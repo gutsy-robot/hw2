@@ -23,11 +23,21 @@ def computeH(x1, x2):
         else:
             a = np.vstack((a, m))
 
-    w, v = LA.eig(np.matmul(a.T, a))
-    min_eig_index = np.argmin(w)
-    H2to1 = v[min_eig_index]
+    U, S, V = np.linalg.svd(a)
+    H2to1 = V.T[:, -1].reshape([3, 3])
 
-    H2to1 = H2to1.reshape(3, 3)
+    # print("mtrix A is: ", a)
+    # w, vec = LA.eig(np.matmul(a.T, a))
+    #
+    # print("w is: ", w)
+    # # print("vec is: ", vec)
+    # min_eig_index = np.argmin(w)
+    # print("index is: ", min_eig_index)
+    # print(vec[min_eig_index])
+    # print(vec[-1])
+    # H2to1 = vec[min_eig_index]
+    #
+    # H2to1 = H2to1.reshape(3, 3)
 
     return H2to1
 
@@ -40,7 +50,7 @@ def computeH_norm(x1, x2):
 
     print("shape of inputs in norm: ", x1.shape, x2.shape)
 
-    m1, m2 = np.mean(x1, axis=0),  np.mean(x2, axis=0)
+    m1, m2 = x1.mean(0),  x2.mean(0)
     print(m1, m2)
 
     x1 = x1 - m1
@@ -71,7 +81,7 @@ def computeH_norm(x1, x2):
     print("shape pf T1 is; ", T1.shape)
     print("shape of T2 is: ", T2.shape)
     print("shape of h is: ", h.shape)
-    H2to1 = np.matmul(np.matmul(np.linalg.inv(T1), h), T2)
+    H2to1 = np.linalg.inv(T1).dot(h).dot(T2)
 
     return H2to1
 

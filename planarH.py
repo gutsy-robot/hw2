@@ -8,8 +8,7 @@ def computeH(x1, x2):
     # Compute the homography between two sets of points
 
     # get four corresponding points from x1 and x2.
-    assert len(x1) == len(x2), "inputs are not of same shape"
-    assert len(x1) >= 4 and len(x2) >= 4, "at least 4 points required to determine H."
+
     indices = np.random.randint(len(x1), size=4)
     a = None
     for ind in indices:
@@ -48,7 +47,7 @@ def computeH_norm(x1, x2):
 
     # Shift the origin of the points to the centroid
 
-    print("shape of inputs in norm: ", x1.shape, x2.shape)
+    # print("shape of inputs in norm: ", x1.shape, x2.shape)
 
     m1, m2 = x1.mean(0),  x2.mean(0)
     print(m1, m2)
@@ -56,7 +55,7 @@ def computeH_norm(x1, x2):
     x1 = x1 - m1
     x2 = x2 - m2
 
-    print("shape after subtraction is: ", x1.shape, x2.shape)
+    # print("shape after subtraction is: ", x1.shape, x2.shape)
 
     # Normalize the points so that the largest distance from the origin is equal to sqrt(2)
     max1 = np.max(LA.norm(x1, axis=1))
@@ -78,9 +77,9 @@ def computeH_norm(x1, x2):
     h = computeH(x1, x2)
 
     # Denormalization
-    print("shape pf T1 is; ", T1.shape)
-    print("shape of T2 is: ", T2.shape)
-    print("shape of h is: ", h.shape)
+    # print("shape pf T1 is; ", T1.shape)
+    # print("shape of T2 is: ", T2.shape)
+    # print("shape of h is: ", h.shape)
     H2to1 = np.linalg.inv(T1).dot(h).dot(T2)
 
     return H2to1
@@ -93,7 +92,7 @@ def computeH_ransac(locs1, locs2, opts):
     # Q2.2.3
     # Compute the best fitting homography given a list of matching points
 
-    print("shape of locs: ", locs1.shape, locs2.shape)
+    # print("shape of locs: ", locs1.shape, locs2.shape)
     max_iters = opts.max_iters  # the number of iterations to run RANSAC for
     inlier_tol = opts.inlier_tol  # the tolerance value for considering a point to be an inlier
 
@@ -135,14 +134,24 @@ def compositeH(H2to1, template, img):
     # Note that the homography we compute is from the image to the template;
     # x_template = H2to1*x_photo
     # For warping the template to the image, we need to invert it.
-
+    warped_img = cv2.warpPerspective(img.swapaxes(0, 1), H2to1, (template.shape[0], template.shape[1])).swapaxes(0, 1)
+    print("shape of warped image: ", warped_img.shape)
+    mask = np.zeros(warped_img.shape)
     # Create mask of same size as template
+    ch1, ch2, ch3 = warped_img[:, :, 0], warped_img[:, :, 1], warped_img[:, :, 2]
 
+    mask[:, :, 0] = (ch1 != 0).astype(int)
+    mask[:, :, 1] = (ch2 != 0).astype(int)
+    mask[:, :, 2] = (ch3 != 0).astype(int)
     # Warp mask by appropriate homography
 
+    print("shape of template is: ", template.shape)
+    print("shaoe of mask is: ", mask.shape)
     # Warp template by appropriate homography
-
+    mask = np.logical_not(mask).astype(int)
+    # print(np.argwhere(mask == 0))
     # Use mask to combine the warped template and the image
 
+    composite_img = warped_img + template * mask
 
     return composite_img

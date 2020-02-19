@@ -42,7 +42,7 @@ def matchPics(I1, I2, opts):
     matches = briefMatch(desc1, desc2, ratio)
 
     # plotMatches(I2, I1, matches, locs1, locs2)
-    print("shape of matches is; ", matches.shape)
-    print("shape of locs1 is: ", locs1.shape)
-    print("shape of locs2 is: ", locs2.shape)
+    # print("shape of matches is; ", matches.shape)
+    # print("shape of locs1 is: ", locs1.shape)
+    # print("shape of locs2 is: ", locs2.shape)
     return matches, locs1, locs2
